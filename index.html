@@ -107,6 +107,8 @@
 
   <input type="text" id="nameInput" placeholder="اكتب اسمك هنا">
   <button onclick="submitName()">أضف اسمك</button>
+<input type="text" id="noteInput" placeholder="اكتب جملة دعم (اختياري)" style="margin-bottom: 10px;">
+
 
   <!-- صوت المكافأة -->
   <audio id="successSound" src="success.mp3" preload="auto"></audio>
@@ -150,7 +152,9 @@ function submitName() {
   // إرسال الاسم إلى Google Sheet
   fetch(scriptURL, {
     method: 'POST',
-    body: new URLSearchParams({ name })
+  const note = document.getElementById("noteInput").value.trim();
+body: new URLSearchParams({ name, note })
+
   })
   .then(res => res.text())
   .then(() => {
@@ -169,7 +173,11 @@ function submitName() {
       .then(text => {
         const json = JSON.parse(text.substr(47).slice(0, -2));
         const rows = json.table.rows;
-        allNames = rows.map(row => row.c[0]?.v || "").filter(Boolean);
+       allNames = rows.map(row => {
+  const name = row.c[0]?.v || "";
+  const note = row.c[1]?.v || "";
+  return { name, note };
+}).filter(n => n.name); // تجاهل السطور الفارغة
 
         // تحديد صفحة الاسم الجديد
         const index = allNames.findIndex(n => n.trim() === name);
@@ -203,13 +211,19 @@ function submitName() {
 
     function renderPage() {
       const startIndex = currentPage * namesPerPage;
-      const pageNames = allNames.slice(startIndex, startIndex + namesPerPage);
+     const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
 
-      const right = pageNames.slice(0, 5).map(name => `🖋️ ${name}`).join("<br>");
-      const left = pageNames.slice(5).map(name => `🖋️ ${name}`).join("<br>");
+const right = pageData.slice(0, 5).map(entry =>
+  `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
+).join("<br>");
 
-      document.getElementById("rightNames").innerHTML = right;
-      document.getElementById("leftNames").innerHTML = left;
+const left = pageData.slice(5).map(entry =>
+  `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
+).join("<br>");
+
+document.getElementById("rightNames").innerHTML = right;
+document.getElementById("leftNames").innerHTML = left;
+
     }
 
     function nextPage() {
