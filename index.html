@@ -137,13 +137,18 @@
 ";
     const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/edit?usp=sharing";
 
-function submitName() {
-  const name = document.getElementById("nameInput").value.trim();
-  if (!name) {
-    alert("من فضلك اكتب اسمك");
-    return;
-  }
+<script>
+  function submitName() {
+    const name = document.getElementById("nameInput").value.trim();
+    if (!name) {
+      alert("من فضلك اكتب اسمك");
+      return;
+    }
 
+    // تأكيد الإرسال (مؤقتًا)
+    alert("جارٍ إرسال الاسم: " + name);
+  }
+</script>
   // تحقق من التكرار
   if (allNames.some(n => n.trim() === name)) {
     alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
