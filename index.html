@@ -28,24 +28,24 @@
     }
 
     .name-column {
-      position: absolute;
-      top: 100px;
-      width: 35%;
-      color: #222;
-      font-size: 22px;
-      line-height: 2.2;
-      padding: 10px;
-    }
+  position: absolute;
+  top: 90px;
+  width: 36%;
+  color: #222;
+  font-size: 20px;
+  line-height: 2.3;
+  padding: 0 10px;
+}
 
-    .left-page {
-      left: 70px;
-      text-align: right;
-    }
+.right-page {
+  right: 80px;
+  text-align: right;
+}
 
-    .right-page {
-      right: 70px;
-      text-align: right;
-    }
+.left-page {
+  left: 80px;
+  text-align: right;
+}
 
     .controls {
       margin-top: 20px;
@@ -107,10 +107,17 @@
   </div>
 
   <!-- رسالة شكر -->
-  <div id="thankYou">
-    <img src="candidate-main.png" alt="المرشح">
-    <h3>شكرًا لدعمك ❤️</h3>
-  </div>
+  <div id="thankYouBox" style="
+  display: none;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+">
+  <img src="candidate-main.png" alt="المرشح" style="width: 160px; border-radius: 12px;">
+  <p style="margin-top: 10px; font-size: 20px; color: #005c97;">شكرًا لدعمك ❤️</p>
+</div>
 
   <script>
     let allNames = [];
@@ -125,10 +132,19 @@
 
     function submitName() {
       const name = document.getElementById("nameInput").value.trim();
-      if (!name) {
-        alert("من فضلك اكتب اسمك");
-        return;
-      }
+    if (!name) {
+  alert("من فضلك اكتب اسمك");
+  return;
+}
+
+// تحقق من التكرار
+if (allNames.some(existing => existing.trim() === name.trim())) {
+  alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
+  return;
+}
+
+}
+
 
       // إرسال الاسم
       fetch(scriptURL, {
@@ -138,11 +154,12 @@
       .then(res => res.text())
       .then(() => {
         document.getElementById("successSound").play();
-        document.getElementById("thankYou").style.display = "block";
+        document.getElementById("thankYouBox").style.display = "block";
         document.getElementById("nameInput").value = "";
-        setTimeout(() => {
-          document.getElementById("thankYou").style.display = "none";
-        }, 3000);
+       setTimeout(() => {
+  document.getElementById("thankYouBox").style.display = "none";
+}, 3000);
+
         fetchNames();
       })
       .catch(err => {
@@ -166,8 +183,9 @@
       const startIndex = currentPage * namesPerPage;
       const pageNames = allNames.slice(startIndex, startIndex + namesPerPage);
 
-      const left = pageNames.slice(0, 5).map(name => `🖋️ ${name}`).join("<br>");
-      const right = pageNames.slice(5).map(name => `🖋️ ${name}`).join("<br>");
+      const right = pageNames.slice(0, 5).map(name => `🖋️ ${name}`).join("<br>");
+const left = pageNames.slice(5).map(name => `🖋️ ${name}`).join("<br>");
+
 
       document.getElementById("leftNames").innerHTML = left;
       document.getElementById("rightNames").innerHTML = right;
