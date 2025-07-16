@@ -36,23 +36,25 @@
 
     .name-column {
   position: absolute;
-  top: 90px;
-  width: 36%;
+  top: 130px; /* نزل الأسماء لتحت */
+  width: 32%; /* قلل العرض شوية */
   color: #222;
   font-size: 20px;
   line-height: 2.3;
   padding: 0 10px;
 }
 
-.right-page {
-  right: 110px;
+
+..right-page {
+  right: 150px;
   text-align: right;
 }
 
 .left-page {
-  left: 110px;
+  left: 100px;
   text-align: right;
 }
+
 
 
     .controls {
@@ -111,11 +113,9 @@
     <div class="name-column left-page" id="leftNames"></div>
 
     <!-- رسالة الشكر -->
-    <div id="thankYouBox">
-      <img src="candidate-main.png" alt="المرشح">
-       
-    </div>
-  </div>
+  <div id="thankYouBox">
+  <img src="candidate-main.png" alt="المرشح">
+</div 
   <div class="controls">
     <button onclick="prevPage()">الصفحة السابقة</button>
     <button onclick="nextPage()">الصفحة التالية</button>
