@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>كتاب دعم د. عمرو سعد الشلمة</title>
+  <title>كتاب دعم د. عمرو الشلمة</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
   <style>
     body {
@@ -14,6 +14,13 @@
 
     h1 {
       margin-bottom: 10px;
+    }
+
+    input {
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+      margin: 10px 5px;
     }
 
     .book-container {
@@ -28,24 +35,24 @@
     }
 
     .name-column {
-  position: absolute;
-  top: 90px;
-  width: 36%;
-  color: #222;
-  font-size: 20px;
-  line-height: 2.3;
-  padding: 0 10px;
-}
+      position: absolute;
+      top: 90px;
+      width: 36%;
+      color: #222;
+      font-size: 20px;
+      line-height: 2.3;
+      padding: 0 10px;
+    }
 
-.right-page {
-  right: 80px;
-  text-align: right;
-}
+    .right-page {
+      right: 80px;
+      text-align: right;
+    }
 
-.left-page {
-  left: 80px;
-  text-align: right;
-}
+    .left-page {
+      left: 80px;
+      text-align: right;
+    }
 
     .controls {
       margin-top: 20px;
@@ -66,27 +73,30 @@
       background-color: #004a7c;
     }
 
-    input {
-      padding: 10px;
-      width: 300px;
-      font-size: 16px;
-      margin: 10px 5px;
-    }
-
-    #thankYou {
+    #thankYouBox {
       display: none;
-      margin-top: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
     }
 
-    #thankYou img {
-      width: 180px;
+    #thankYouBox img {
+      width: 150px;
       border-radius: 12px;
+    }
+
+    #thankYouBox p {
+      font-size: 20px;
+      margin-top: 10px;
+      color: #005c97;
     }
   </style>
 </head>
 <body>
 
-  <h1>📘 أكتب اسمك في كتاب دعم د\ عمرو سعد الشلمه</h1>
+  <h1>📘 أكتب اسمك في كتاب الدعم</h1>
 
   <input type="text" id="nameInput" placeholder="اكتب اسمك هنا">
   <button onclick="submitName()">أضف اسمك</button>
@@ -94,59 +104,45 @@
   <!-- صوت المكافأة -->
   <audio id="successSound" src="success.mp3" preload="auto"></audio>
 
-  <!-- صورة الكتاب مع الأسماء -->
+  <!-- صورة الكتاب مع الأعمدة -->
   <div class="book-container">
-    <div class="name-column left-page" id="leftNames"></div>
     <div class="name-column right-page" id="rightNames"></div>
-  </div>
+    <div class="name-column left-page" id="leftNames"></div>
 
-  <!-- التنقل بين الصفحات -->
+    <!-- رسالة الشكر -->
+    <div id="thankYouBox">
+      <img src="candidate-main.png" alt="المرشح">
+      <p>شكرًا لدعمك ❤️</p>
+    </div>
+  </div>
   <div class="controls">
     <button onclick="prevPage()">الصفحة السابقة</button>
     <button onclick="nextPage()">الصفحة التالية</button>
   </div>
-
-  <!-- رسالة شكر -->
-  <div id="thankYouBox" style="
-  display: none;
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-">
-  <img src="candidate-main.png" alt="المرشح" style="width: 160px; border-radius: 12px;">
-  <p style="margin-top: 10px; font-size: 20px; color: #005c97;">شكرًا لدعمك ❤️</p>
-</div>
 
   <script>
     let allNames = [];
     let currentPage = 0;
     const namesPerPage = 10;
 
-    // رابط Google Apps Script لإرسال الاسم (غيره بالرابط بتاعك لو اختلف)
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwyGl4uqHRQAvXs0YlNmJJsanG8j9GsRhj4bCOvYF52HBwnnK4MWRdtX9qgLUVqqI91HQ/exec";
-
-    // رابط Google Sheet لقراءة الأسماء – حط ID الشيت مكان YOUR_SHEET_ID
+    // روابط الاتصال
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzSbKVMQOoFj31EfXh8_nSQAeDshpUi8-vr-IApaX1rEGF8X5ukHYDrGGaepchqTWkX/exec";
     const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/gviz/tq?tqx=out:json";
 
     function submitName() {
       const name = document.getElementById("nameInput").value.trim();
-    if (!name) {
-  alert("من فضلك اكتب اسمك");
-  return;
-}
+      if (!name) {
+        alert("من فضلك اكتب اسمك");
+        return;
+      }
 
-// تحقق من التكرار
-if (allNames.some(existing => existing.trim() === name.trim())) {
-  alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
-  return;
-}
+      // تحقق من التكرار
+      if (allNames.some(n => n.trim() === name)) {
+        alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
+        return;
+      }
 
-}
-
-
-      // إرسال الاسم
+      // إرسال الاسم إلى Google Sheet
       fetch(scriptURL, {
         method: 'POST',
         body: new URLSearchParams({ name })
@@ -156,11 +152,12 @@ if (allNames.some(existing => existing.trim() === name.trim())) {
         document.getElementById("successSound").play();
         document.getElementById("thankYouBox").style.display = "block";
         document.getElementById("nameInput").value = "";
-       setTimeout(() => {
-  document.getElementById("thankYouBox").style.display = "none";
-}, 3000);
 
-        fetchNames();
+        setTimeout(() => {
+          document.getElementById("thankYouBox").style.display = "none";
+        }, 3000);
+
+        fetchNames(); // تحديث الأسماء
       })
       .catch(err => {
         alert("حدث خطأ أثناء الإرسال");
@@ -184,11 +181,10 @@ if (allNames.some(existing => existing.trim() === name.trim())) {
       const pageNames = allNames.slice(startIndex, startIndex + namesPerPage);
 
       const right = pageNames.slice(0, 5).map(name => `🖋️ ${name}`).join("<br>");
-const left = pageNames.slice(5).map(name => `🖋️ ${name}`).join("<br>");
+      const left = pageNames.slice(5).map(name => `🖋️ ${name}`).join("<br>");
 
-
-      document.getElementById("leftNames").innerHTML = left;
       document.getElementById("rightNames").innerHTML = right;
+      document.getElementById("leftNames").innerHTML = left;
     }
 
     function nextPage() {
@@ -205,6 +201,7 @@ const left = pageNames.slice(5).map(name => `🖋️ ${name}`).join("<br>");
       }
     }
 
+    // عند فتح الصفحة
     window.onload = fetchNames;
   </script>
 
