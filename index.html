@@ -134,60 +134,61 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbzSbKVMQOoFj31EfXh8_nSQAeDshpUi8-vr-IApaX1rEGF8X5ukHYDrGGaepchqTWkX/exec";
     const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/gviz/tq?tqx=out:json";
 
-    function submitName() {
-      const name = document.getElementById("nameInput").value.trim();
-      if (!name) {
-        alert("من فضلك اكتب اسمك");
-        return;
-      }
+function submitName() {
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name) {
+    alert("من فضلك اكتب اسمك");
+    return;
+  }
 
-      // تحقق من التكرار
-      if (allNames.some(n => n.trim() === name)) {
-        alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
-        return;
-      }
+  // تحقق من التكرار
+  if (allNames.some(n => n.trim() === name)) {
+    alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
+    return;
+  }
 
-      // إرسال الاسم إلى Google Sheet
-      fetch(scriptURL, {
-        method: 'POST',
-        body: new URLSearchParams({ name })
-      })
-      .then(res => res.text())
-      .then(() => {
-        document.getElementById("successSound").play();
-        document.getElementById("thankYouBox").style.display = "block";
-        document.getElementById("nameInput").value = "";
-
-        setTimeout(() => {
-          document.getElementById("thankYouBox").style.display = "none";
-        }, 3000);
-
-        fetchNames(); // تحديث الأسماء
-        // بعد نجاح الإرسال
-fetch(sheetURL)
+  // إرسال الاسم إلى Google Sheet
+  fetch(scriptURL, {
+    method: 'POST',
+    body: new URLSearchParams({ name })
+  })
   .then(res => res.text())
-  .then(text => {
-    const json = JSON.parse(text.substr(47).slice(0, -2));
-    const rows = json.table.rows;
-    allNames = rows.map(row => row.c[0]?.v || "").filter(Boolean);
+  .then(() => {
+    // تشغيل الصوت والصورة
+    document.getElementById("successSound").play();
+    document.getElementById("thankYouBox").style.display = "block";
+    document.getElementById("nameInput").value = "";
 
-    // حساب رقم الصفحة الجديدة التي تحتوي على الاسم المضاف
-    const index = allNames.findIndex(n => n.trim() === name);
-    if (index !== -1) {
-      currentPage = Math.floor(index / namesPerPage); // كل صفحة فيها 10 أسماء
-    }
+    setTimeout(() => {
+      document.getElementById("thankYouBox").style.display = "none";
+    }, 3000);
 
-    renderPage();
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    // إعادة تحميل الأسماء من الشيت وتحديد الصفحة الجديدة تلقائيًا
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+        allNames = rows.map(row => row.c[0]?.v || "").filter(Boolean);
 
- 
+        // تحديد صفحة الاسم الجديد
+        const index = allNames.findIndex(n => n.trim() === name);
+        if (index !== -1) {
+          currentPage = Math.floor(index / namesPerPage);
+        }
 
-      })
-      .catch(err => {
-        alert("حدث خطأ أثناء الإرسال");
-        console.error(err);
+        renderPage();
+
+        // اختياري: سكرول للأسفل عشان يشوف اسمه فورًا
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       });
-    }
+  })
+  .catch(err => {
+    alert("حدث خطأ أثناء الإرسال");
+    console.error(err);
+  });
+}
+
 
     function fetchNames() {
       fetch(sheetURL)
