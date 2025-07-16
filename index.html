@@ -163,6 +163,25 @@
         }, 3000);
 
         fetchNames(); // تحديث الأسماء
+        // بعد نجاح الإرسال
+fetch(sheetURL)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+    const rows = json.table.rows;
+    allNames = rows.map(row => row.c[0]?.v || "").filter(Boolean);
+
+    // حساب رقم الصفحة الجديدة التي تحتوي على الاسم المضاف
+    const index = allNames.findIndex(n => n.trim() === name);
+    if (index !== -1) {
+      currentPage = Math.floor(index / namesPerPage); // كل صفحة فيها 10 أسماء
+    }
+
+    renderPage();
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+ 
+
       })
       .catch(err => {
         alert("حدث خطأ أثناء الإرسال");
