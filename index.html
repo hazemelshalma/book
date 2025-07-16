@@ -127,128 +127,122 @@
     <button onclick="nextPage()">الصفحة التالية</button>
   </div>
 
-  <script>
-    let allNames = [];
-    let currentPage = 0;
-    const namesPerPage = 10;
-
-    // روابط الاتصال
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzbfQwHoVuZlRfOw2e4XB0XcypPC8xiheKDt7TU_CT2nwxRQztUrWLHF5yJTz0cCNHQ4g/exec
-";
-    const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/edit?usp=sharing";
-
 <script>
+  let allNames = [];
+  let currentPage = 0;
+  const namesPerPage = 10;
+
+  const scriptURL = "https://script.google.com/macros/s/AKfycbzbfQwHoVuZlRfOw2e4XB0XcypPC8xiheKDt7TU_CT2nwxRQztUrWLHF5yJTz0cCNHQ4g/exec";
+  const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/gviz/tq?tqx=out:json";
+
   function submitName() {
     const name = document.getElementById("nameInput").value.trim();
+    const note = document.getElementById("noteInput").value.trim();
+
     if (!name) {
       alert("من فضلك اكتب اسمك");
       return;
     }
 
-    // تأكيد الإرسال (مؤقتًا)
-    alert("جارٍ إرسال الاسم: " + name);
-  }
-</script>
-  // تحقق من التكرار
-  if (allNames.some(n => n.trim() === name)) {
-    alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
-    return;
-  }
+    // تحقق من التكرار
+    if (allNames.some(n => n.name.trim() === name)) {
+      alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
+      return;
+    }
 
-  // إرسال الاسم إلى Google Sheet
-  fetch(scriptURL, {
-    method: 'POST',
-  const note = document.getElementById("noteInput").value.trim();
-body: new URLSearchParams({ name, note })
+    fetch(scriptURL, {
+      method: 'POST',
+      body: new URLSearchParams({ name, note })
+    })
+    .then(res => res.text())
+    .then(() => {
+      document.getElementById("successSound").play();
+      document.getElementById("thankYouBox").style.display = "block";
+      document.getElementById("nameInput").value = "";
+      document.getElementById("noteInput").value = "";
 
-  })
-  .then(res => res.text())
-  .then(() => {
-    // تشغيل الصوت والصورة
-    document.getElementById("successSound").play();
-    document.getElementById("thankYouBox").style.display = "block";
-    document.getElementById("nameInput").value = "";
+      setTimeout(() => {
+        document.getElementById("thankYouBox").style.display = "none";
+      }, 3000);
 
-    setTimeout(() => {
-      document.getElementById("thankYouBox").style.display = "none";
-    }, 3000);
-
-    // إعادة تحميل الأسماء من الشيت وتحديد الصفحة الجديدة تلقائيًا
-    fetch(sheetURL)
-      .then(res => res.text())
-      .then(text => {
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
-       allNames = rows.map(row => {
-  const name = row.c[0]?.v || "";
-  const note = row.c[1]?.v || "";
-  return { name, note };
-}).filter(n => n.name); // تجاهل السطور الفارغة
-
-        // تحديد صفحة الاسم الجديد
-        const index = allNames.findIndex(n => n.trim() === name);
-        if (index !== -1) {
-          currentPage = Math.floor(index / namesPerPage);
-        }
-
-        renderPage();
-
-        // اختياري: سكرول للأسفل عشان يشوف اسمه فورًا
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      });
-  })
-  .catch(err => {
-    alert("حدث خطأ أثناء الإرسال");
-    console.error(err);
-  });
-}
-
-
-    function fetchNames() {
+      // تحديث الأسماء والانتقال للصفحة الجديدة
       fetch(sheetURL)
         .then(res => res.text())
         .then(text => {
           const json = JSON.parse(text.substr(47).slice(0, -2));
           const rows = json.table.rows;
-          allNames = rows.map(row => row.c[0]?.v || "").filter(Boolean);
+
+          allNames = rows.map(row => {
+            const name = row.c[0]?.v || "";
+            const note = row.c[1]?.v || "";
+            return { name, note };
+          }).filter(n => n.name);
+
+          const index = allNames.findIndex(n => n.name.trim() === name);
+          if (index !== -1) {
+            currentPage = Math.floor(index / namesPerPage);
+          }
+
           renderPage();
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
-    }
+    })
+    .catch(err => {
+      alert("حدث خطأ أثناء الإرسال");
+      console.error(err);
+    });
+  }
 
-    function renderPage() {
-      const startIndex = currentPage * namesPerPage;
-     const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
+  function fetchNames() {
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
 
-const right = pageData.slice(0, 5).map(entry =>
-  `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
-).join("<br>");
+        allNames = rows.map(row => {
+          const name = row.c[0]?.v || "";
+          const note = row.c[1]?.v || "";
+          return { name, note };
+        }).filter(n => n.name);
 
-const left = pageData.slice(5).map(entry =>
-  `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
-).join("<br>");
-
-document.getElementById("rightNames").innerHTML = right;
-document.getElementById("leftNames").innerHTML = left;
-
-    }
-
-    function nextPage() {
-      if ((currentPage + 1) * namesPerPage < allNames.length) {
-        currentPage++;
         renderPage();
-      }
-    }
+      });
+  }
 
-    function prevPage() {
-      if (currentPage > 0) {
-        currentPage--;
-        renderPage();
-      }
-    }
+  function renderPage() {
+    const startIndex = currentPage * namesPerPage;
+    const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
 
-    // عند فتح الصفحة
-    window.onload = fetchNames;
-  </script>
+    const right = pageData.slice(0, 5).map(entry =>
+      `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
+    ).join("<br>");
+
+    const left = pageData.slice(5).map(entry =>
+      `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
+    ).join("<br>");
+
+    document.getElementById("rightNames").innerHTML = right;
+    document.getElementById("leftNames").innerHTML = left;
+  }
+
+  function nextPage() {
+    if ((currentPage + 1) * namesPerPage < allNames.length) {
+      currentPage++;
+      renderPage();
+    }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) {
+      currentPage--;
+      renderPage();
+    }
+  }
+
+  window.onload = fetchNames;
+</script>
+
 
 </body>
 </html>
