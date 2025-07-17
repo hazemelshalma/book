@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -10,6 +10,21 @@
       background: #f4f4f4;
       text-align: center;
       padding: 20px;
+    }
+
+    @keyframes highlight {
+      0%   { background-color: #fffae6; }
+      50%  { background-color: #fff3b0; }
+      100% { background-color: transparent; }
+    }
+
+    .name-entry.highlight {
+      animation: highlight 1.5s ease;
+    }
+
+    .name-entry {
+      margin-bottom: 12px;
+      line-height: 1.4;
     }
 
     h1 {
@@ -35,35 +50,31 @@
     }
 
     .name-column {
-  position: absolute;
-  top: 130px;
-  width: 28%;
-  color: #222;
-  font-size: 20px;
-  line-height: 2.3;
-  padding: 0 10px;
-}
+      position: absolute;
+      top: 130px;
+      width: 28%;
+      color: #222;
+      font-size: 20px;
+      line-height: 2.3;
+      padding: 0 10px;
+    }
 
-.right-page {
-  right: 160px;
-  text-align: right;
-}
+    .right-page {
+      right: 160px;
+      text-align: right;
+    }
 
-.left-page {
-  left: 150px;
-  text-align: right;
-}
-
-
-
+    .left-page {
+      left: 150px;
+      text-align: right;
+    }
 
     .controls {
-  margin-top: 30px;
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
 
     .controls button {
       padding: 10px 20px;
@@ -103,69 +114,84 @@
 </head>
 <body>
 
-  <h1>📘 أكتب اسمك في كتاب دعم د\ عمرو سعد الشلمه</h1>
+  <h1>📘 أكتب اسمك في كتاب دعم د. عمرو سعد الشلمة</h1>
 
   <input type="text" id="nameInput" placeholder="اكتب اسمك هنا">
-  <button onclick="submitName()">أضف اسمك</button>
-<input type="text" id="noteInput" placeholder="اكتب جملة دعم (اختياري)" style="margin-bottom: 10px;">
+  <input type="text" id="noteInput" placeholder="اكتب جملة دعم (اختياري)">
+  <button onclick="submitName()">أضف للكتاب</button>
 
-
-  <!-- صوت المكافأة -->
   <audio id="successSound" src="success.mp3" preload="auto"></audio>
 
-  <!-- صورة الكتاب مع الأعمدة -->
   <div class="book-container">
     <div class="name-column right-page" id="rightNames"></div>
     <div class="name-column left-page" id="leftNames"></div>
+  </div>
 
-    <!-- رسالة الشكر -->
   <div id="thankYouBox">
-  <img src="candidate-main.png" alt="المرشح">
-</div 
+    <img src="candidate-main.png" alt="المرشح">
+  </div>
+
   <div class="controls">
     <button onclick="prevPage()">الصفحة السابقة</button>
     <button onclick="nextPage()">الصفحة التالية</button>
   </div>
 
-<script>
-  let allNames = [];
-  let currentPage = 0;
-  const namesPerPage = 10;
+  <script>
+    let allNames = [];
+    let currentPage = 0;
+    const namesPerPage = 10;
+    let lastAddedName = "";
 
-  const scriptURL = "https://script.google.com/macros/s/AKfycbzbfQwHoVuZlRfOw2e4XB0XcypPC8xiheKDt7TU_CT2nwxRQztUrWLHF5yJTz0cCNHQ4g/exec";
-  const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/gviz/tq?tqx=out:json";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzJw4fAPCPFcx5SeFuh-wP5BiLABlHZNI0vJ89jcGXlz17sMiPnziZlevambcw7WyXS6w/exec";
+    const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/gviz/tq?tqx=out:json";
 
-  function submitName() {
-    const name = document.getElementById("nameInput").value.trim();
-    const note = document.getElementById("noteInput").value.trim();
+    function submitName() {
+      const name = document.getElementById("nameInput").value.trim();
+      const note = document.getElementById("noteInput").value.trim();
 
-    if (!name) {
-      alert("من فضلك اكتب اسمك");
-      return;
+      if (!name) {
+        alert("من فضلك اكتب اسمك");
+        return;
+      }
+
+      if (allNames.some(n => n.name.trim() === name)) {
+        alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
+        return;
+      }
+
+      lastAddedName = name;
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: new URLSearchParams({ name, note })
+      })
+        .then(res => res.text())
+        .then(() => {
+          document.getElementById("successSound").play();
+          document.getElementById("thankYouBox").style.display = "block";
+          document.getElementById("nameInput").value = "";
+          document.getElementById("noteInput").value = "";
+
+          setTimeout(() => {
+            document.getElementById("thankYouBox").style.display = "none";
+          }, 3000);
+
+          fetchNames(() => {
+            const index = allNames.findIndex(n => n.name.trim() === name);
+            if (index !== -1) {
+              currentPage = Math.floor(index / namesPerPage);
+            }
+            renderPage();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          });
+        })
+        .catch(err => {
+          alert("حدث خطأ أثناء الإرسال");
+          console.error(err);
+        });
     }
 
-    // تحقق من التكرار
-    if (allNames.some(n => n.name.trim() === name)) {
-      alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
-      return;
-    }
-
-    fetch(scriptURL, {
-      method: 'POST',
-      body: new URLSearchParams({ name, note })
-    })
-    .then(res => res.text())
-    .then(() => {
-      document.getElementById("successSound").play();
-      document.getElementById("thankYouBox").style.display = "block";
-      document.getElementById("nameInput").value = "";
-      document.getElementById("noteInput").value = "";
-
-      setTimeout(() => {
-        document.getElementById("thankYouBox").style.display = "none";
-      }, 3000);
-
-      // تحديث الأسماء والانتقال للصفحة الجديدة
+    function fetchNames(callback) {
       fetch(sheetURL)
         .then(res => res.text())
         .then(text => {
@@ -178,74 +204,52 @@
             return { name, note };
           }).filter(n => n.name);
 
-          const index = allNames.findIndex(n => n.name.trim() === name);
-          if (index !== -1) {
-            currentPage = Math.floor(index / namesPerPage);
-          }
-
-          renderPage();
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          if (callback) callback();
         });
-    })
-    .catch(err => {
-      alert("حدث خطأ أثناء الإرسال");
-      console.error(err);
-    });
-  }
+    }
 
-  function fetchNames() {
-    fetch(sheetURL)
-      .then(res => res.text())
-      .then(text => {
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
+    function renderPage() {
+      const startIndex = currentPage * namesPerPage;
+      const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
 
-        allNames = rows.map(row => {
-          const name = row.c[0]?.v || "";
-          const note = row.c[1]?.v || "";
-          return { name, note };
-        }).filter(n => n.name);
+      const right = pageData.slice(0, 5).map(entry =>
+        `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
+          <strong>🖋️ ${entry.name}</strong><br>
+          <small style="color:#666; font-size:13px">${entry.note || ''}</small>
+        </div>`
+      ).join("");
 
+      const left = pageData.slice(5).map(entry =>
+        `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
+          <strong>🖋️ ${entry.name}</strong><br>
+          <small style="color:#666; font-size:13px">${entry.note || ''}</small>
+        </div>`
+      ).join("");
+
+      document.getElementById("rightNames").innerHTML = right;
+      document.getElementById("leftNames").innerHTML = left;
+    }
+
+    function nextPage() {
+      if ((currentPage + 1) * namesPerPage < allNames.length) {
+        currentPage++;
         renderPage();
-      });
-  }
-
-  function renderPage() {
-    const startIndex = currentPage * namesPerPage;
-    const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
-
-    const right = pageData.slice(0, 5).map(entry =>
-      `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
-    ).join("<br>");
-
-    const left = pageData.slice(5).map(entry =>
-      `<div><strong>🖋️ ${entry.name}</strong><br><small style="font-size: 14px; color: #555;">${entry.note}</small></div>`
-    ).join("<br>");
-
-    document.getElementById("rightNames").innerHTML = right;
-    document.getElementById("leftNames").innerHTML = left;
-  }
-
-  function nextPage() {
-    if ((currentPage + 1) * namesPerPage < allNames.length) {
-      currentPage++;
-      renderPage();
+      }
     }
-  }
 
-  function prevPage() {
-    if (currentPage > 0) {
-      currentPage--;
-      renderPage();
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        renderPage();
+      }
     }
-  }
 
-  window.onload = fetchNames;
-</script>
-
+    window.onload = () => fetchNames(renderPage);
+  </script>
 
 </body>
 </html>
+
 
 
 
