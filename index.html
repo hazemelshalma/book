@@ -112,19 +112,22 @@
       background-color: #004a7c;
     }
 
-    #thankYouBox {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
+   #thankYouBox {
+  display: none;
+  position: absolute;
+  top: 20%; /* خلي الصورة تطلع فوق الكتاب */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 9999; /* عشان تطلع فوق كل حاجة */
+}
 
-    #thankYouBox img {
-      width: 200px;
-      border-radius: 12px;
-    }
+#thankYouBox img {
+  width: 250px; /* كبر الصورة شوية */
+  max-width: 80%;
+  border-radius: 12px;
+}
+
 
     #thankYouBox p {
       font-size: 20px;
