@@ -171,7 +171,7 @@
   <h1>📘 أكتب اسمك في كتاب دعم د. عمرو سعد الشلمة</h1>
 
   <input type="text" id="nameInput" placeholder="اكتب اسمك هنا">
-  <input type="text" id="noteInput" placeholder="اكتب جملة دعم (اختياري)">
+<input type="text" id="noteInput" maxlength="50" placeholder="اكتب جملة دعم (اختياري)">
   <button onclick="submitName()">أضف للكتاب</button>
 
   <audio id="successSound" src="success.mp3" preload="auto"></audio>
@@ -202,6 +202,10 @@
     function submitName() {
       const name = document.getElementById("nameInput").value.trim();
       const note = document.getElementById("noteInput").value.trim();
+if (note.length > 50) {
+  alert("⚠️ الحد الأقصى لجملة الدعم هو 50 حرف فقط.");
+  return;
+}
 
       if (!name) {
         alert("من فضلك اكتب اسمك");
