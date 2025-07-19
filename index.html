@@ -2,16 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>كتاب دعم د. عمرو الشلمة</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Amiri', serif;
       background: #f4f4f4;
       text-align: center;
       padding: 20px;
-      overflow-x: auto; /* ✅ لتفعيل السحب يمين وشمال لو الشاشة صغيرة */
     }
 
     @keyframes highlight {
@@ -40,6 +39,11 @@
       margin: 10px 5px;
     }
 
+    .zoom-area {
+      display: inline-block;
+      transform-origin: top center;
+    }
+
     .book-container {
       width: 800px;
       height: 550px;
@@ -56,7 +60,7 @@
       top: 110px;
       width: 28%;
       color: #222;
-      font-size: 18px; /* ✅ صغر الخط شوية */
+      font-size: 20px;
       line-height: 2.3;
       padding: 0 10px;
     }
@@ -81,7 +85,6 @@
     .controls button {
       padding: 10px 20px;
       font-size: 16px;
-      margin: 5px;
       background-color: #005c97;
       color: white;
       border: none;
@@ -107,31 +110,35 @@
       border-radius: 12px;
     }
 
-    #thankYouBox p {
-      font-size: 20px;
-      margin-top: 10px;
-      color: #005c97;
-    }
-
-    /* ✅ ميديا كويري علشان زوم الموبايل */
     @media (max-width: 768px) {
-      .book-container {
-        transform: scale(1.3);
-        transform-origin: top center;
-      }
-
-      .name-column {
-        font-size: 15px;
-      }
-
-      input, button {
-        width: 90%;
-        font-size: 18px;
+      .zoom-area {
+        transform: scale(1.2);
       }
 
       .controls {
         flex-direction: column;
-        gap: 10px;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .controls button {
+        width: 80%;
+        font-size: 18px;
+        padding: 14px 20px;
+      }
+
+      input {
+        width: 90%;
+      }
+
+      .book-container {
+        width: 100%;
+        height: auto;
+        background-size: 100% auto;
+      }
+
+      .name-column {
+        font-size: 16px;
       }
     }
   </style>
@@ -146,18 +153,20 @@
 
   <audio id="successSound" src="success.mp3" preload="auto"></audio>
 
-  <div class="book-container">
-    <div class="name-column right-page" id="rightNames"></div>
-    <div class="name-column left-page" id="leftNames"></div>
+  <div class="zoom-area">
+    <div class="book-container">
+      <div class="name-column right-page" id="rightNames"></div>
+      <div class="name-column left-page" id="leftNames"></div>
+    </div>
+
+    <div class="controls">
+      <button onclick="prevPage()">⬅️ الصفحة السابقة</button>
+      <button onclick="nextPage()">➡️ الصفحة التالية</button>
+    </div>
   </div>
 
   <div id="thankYouBox">
     <img src="candidate-main.png" alt="المرشح">
-  </div>
-
-  <div class="controls">
-    <button onclick="prevPage()">الصفحة السابقة</button>
-    <button onclick="nextPage()">الصفحة التالية</button>
   </div>
 
   <script>
@@ -238,14 +247,14 @@
 
       const right = pageData.slice(0, 5).map(entry =>
         `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
-          <strong style="font-size:17px;">🖋️ ${entry.name}</strong><br>
+          <strong style="font-size:18px;">🖋️ ${entry.name}</strong><br>
           <small style="color:#666; font-size:13px">${entry.note || ''}</small>
         </div>`
       ).join("");
 
       const left = pageData.slice(5).map(entry =>
         `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
-          <strong style="font-size:17px;">🖋️ ${entry.name}</strong><br>
+          <strong style="font-size:18px;">🖋️ ${entry.name}</strong><br>
           <small style="color:#666; font-size:13px">${entry.note || ''}</small>
         </div>`
       ).join("");
@@ -273,6 +282,7 @@
 
 </body>
 </html>
+
 
 
 
