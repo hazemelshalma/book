@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>كتاب دعم د. عمرو الشلمة</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
   <style>
@@ -10,6 +11,7 @@
       background: #f4f4f4;
       text-align: center;
       padding: 20px;
+      overflow-x: auto; /* ✅ لتفعيل السحب يمين وشمال لو الشاشة صغيرة */
     }
 
     @keyframes highlight {
@@ -54,7 +56,7 @@
       top: 110px;
       width: 28%;
       color: #222;
-      font-size: 20px;
+      font-size: 18px; /* ✅ صغر الخط شوية */
       line-height: 2.3;
       padding: 0 10px;
     }
@@ -109,6 +111,28 @@
       font-size: 20px;
       margin-top: 10px;
       color: #005c97;
+    }
+
+    /* ✅ ميديا كويري علشان زوم الموبايل */
+    @media (max-width: 768px) {
+      .book-container {
+        transform: scale(1.3);
+        transform-origin: top center;
+      }
+
+      .name-column {
+        font-size: 15px;
+      }
+
+      input, button {
+        width: 90%;
+        font-size: 18px;
+      }
+
+      .controls {
+        flex-direction: column;
+        gap: 10px;
+      }
     }
   </style>
 </head>
@@ -214,14 +238,14 @@
 
       const right = pageData.slice(0, 5).map(entry =>
         `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
-          <strong>🖋️ ${entry.name}</strong><br>
+          <strong style="font-size:17px;">🖋️ ${entry.name}</strong><br>
           <small style="color:#666; font-size:13px">${entry.note || ''}</small>
         </div>`
       ).join("");
 
       const left = pageData.slice(5).map(entry =>
         `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
-          <strong>🖋️ ${entry.name}</strong><br>
+          <strong style="font-size:17px;">🖋️ ${entry.name}</strong><br>
           <small style="color:#666; font-size:13px">${entry.note || ''}</small>
         </div>`
       ).join("");
@@ -249,6 +273,7 @@
 
 </body>
 </html>
+
 
 
 
