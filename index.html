@@ -4,29 +4,14 @@
   <meta charset="UTF-8">
   <title>📘 كتاب دعم د. عمرو الشلمة</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Amiri', serif;
       background: #f4f4f4;
       text-align: center;
       padding: 20px;
-    }
-
-    @keyframes highlight {
-      0%   { background-color: #fffae6; }
-      50%  { background-color: #fff3b0; }
-      100% { background-color: transparent; }
-    }
-
-    .name-entry.highlight {
-      animation: highlight 1.5s ease;
-    }
-
-    .name-entry {
-      margin-bottom: 10px;
-      line-height: 1.5;
-      word-break: break-word;
-      overflow-wrap: break-word;
+      margin: 0;
     }
 
     h1 {
@@ -60,35 +45,32 @@
       font-size: 18px;
       line-height: 2.1;
       padding: 0 10px;
+      word-break: break-word;
     }
 
-   .right-page {
-  right: 160px;
-  text-align: right;
-}
+    .right-page {
+      right: 160px;
+      text-align: right;
+    }
 
-.left-page {
-  left: 60px;
-  text-align: right;
-}
+    .left-page {
+      left: 60px;
+      text-align: right;
+    }
 
-@media (max-width: 768px) {
-  .right-page {
-    right: 12%;
-  }
+    .name-entry {
+      margin-bottom: 10px;
+    }
 
-  .left-page {
-    left: 12%;
-  }
+    @keyframes highlight {
+      0% { background-color: #fffae6; }
+      50% { background-color: #fff3b0; }
+      100% { background-color: transparent; }
+    }
 
-  .name-column {
-    font-size: 14px;
-    width: 36%;
-    top: 90px;
-    line-height: 1.9;
-  }
-}
-
+    .name-entry.highlight {
+      animation: highlight 1.5s ease;
+    }
 
     .controls {
       margin-top: 30px;
@@ -112,35 +94,26 @@
       background-color: #004a7c;
     }
 
-   #thankYouBox {
-  display: none;
-  position: absolute;
-  top: 20%; /* خلي الصورة تطلع فوق الكتاب */
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  z-index: 9999; /* عشان تطلع فوق كل حاجة */
-}
+    #thankYouBox {
+      display: none;
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      text-align: center;
+    }
 
-#thankYouBox img {
-  width: 250px; /* كبر الصورة شوية */
-  max-width: 80%;
-  border-radius: 12px;
-}
-
-
-    #thankYouBox p {
-      font-size: 20px;
-      margin-top: 10px;
-      color: #005c97;
+    #thankYouBox img {
+      width: 250px;
+      max-width: 90%;
+      border-radius: 12px;
     }
 
     @media (max-width: 768px) {
       .book-container {
         width: 100%;
         height: 420px;
-        background-size: contain;
-        background-position: center;
       }
 
       .name-column {
@@ -174,7 +147,7 @@
   <h1>📘 أكتب اسمك في كتاب دعم د. عمرو سعد الشلمة</h1>
 
   <input type="text" id="nameInput" placeholder="اكتب اسمك هنا">
-<input type="text" id="noteInput" maxlength="50" placeholder="اكتب جملة دعم (اختياري)">
+  <input type="text" id="noteInput" maxlength="50" placeholder="اكتب جملة دعم (اختياري)">
   <button onclick="submitName()">أضف للكتاب</button>
 
   <audio id="successSound" src="success.mp3" preload="auto"></audio>
@@ -205,10 +178,11 @@
     function submitName() {
       const name = document.getElementById("nameInput").value.trim();
       const note = document.getElementById("noteInput").value.trim();
-if (note.length > 50) {
-  alert("⚠️ الحد الأقصى لجملة الدعم هو 50 حرف فقط.");
-  return;
-}
+
+      if (note.length > 50) {
+        alert("⚠️ الحد الأقصى لجملة الدعم هو 50 حرف فقط.");
+        return;
+      }
 
       if (!name) {
         alert("من فضلك اكتب اسمك");
@@ -226,47 +200,47 @@ if (note.length > 50) {
         method: 'POST',
         body: new URLSearchParams({ name, note })
       })
-        .then(res => res.text())
-        .then(() => {
-          document.getElementById("successSound").play();
-          document.getElementById("thankYouBox").style.display = "block";
-          document.getElementById("nameInput").value = "";
-          document.getElementById("noteInput").value = "";
+      .then(res => res.text())
+      .then(() => {
+        document.getElementById("successSound").play();
+        document.getElementById("thankYouBox").style.display = "block";
+        document.getElementById("nameInput").value = "";
+        document.getElementById("noteInput").value = "";
 
-          setTimeout(() => {
-            document.getElementById("thankYouBox").style.display = "none";
-          }, 3000);
+        setTimeout(() => {
+          document.getElementById("thankYouBox").style.display = "none";
+        }, 3000);
 
-          fetchNames(() => {
-            const index = allNames.findIndex(n => n.name.trim() === name);
-            if (index !== -1) {
-              currentPage = Math.floor(index / namesPerPage);
-            }
-            renderPage();
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-          });
-        })
-        .catch(err => {
-          alert("حدث خطأ أثناء الإرسال");
-          console.error(err);
+        fetchNames(() => {
+          const index = allNames.findIndex(n => n.name.trim() === name);
+          if (index !== -1) {
+            currentPage = Math.floor(index / namesPerPage);
+          }
+          renderPage();
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
+      })
+      .catch(err => {
+        alert("حدث خطأ أثناء الإرسال");
+        console.error(err);
+      });
     }
 
     function fetchNames(callback) {
       fetch(sheetURL)
-        .then(res => res.text())
-        .then(text => {
-          const json = JSON.parse(text.substr(47).slice(0, -2));
-          const rows = json.table.rows;
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
 
-          allNames = rows.map(row => {
-            const name = row.c[0]?.v || "";
-            const note = row.c[1]?.v || "";
-            return { name, note };
-          }).filter(n => n.name);
+        allNames = rows.map(row => {
+          const name = row.c[0]?.v || "";
+          const note = row.c[1]?.v || "";
+          return { name, note };
+        }).filter(n => n.name);
 
-          if (callback) callback();
-        });
+        if (callback) callback();
+      });
     }
 
     function renderPage() {
@@ -275,15 +249,15 @@ if (note.length > 50) {
 
       const right = pageData.slice(0, 5).map(entry =>
         `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
-          <strong style="font-size:16px; color:#111;">🖋️ ${entry.name}</strong><br>
-          <small style="color:#777; font-size:12px;">${entry.note || ''}</small>
+          <strong style="font-size:16px;">🖋️ ${entry.name}</strong><br>
+          <small style="color:#666; font-size:12px">${entry.note || ''}</small>
         </div>`
       ).join("");
 
       const left = pageData.slice(5).map(entry =>
         `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
-          <strong style="font-size:16px; color:#111;">🖋️ ${entry.name}</strong><br>
-          <small style="color:#777; font-size:12px;">${entry.note || ''}</small>
+          <strong style="font-size:16px;">🖋️ ${entry.name}</strong><br>
+          <small style="color:#666; font-size:12px">${entry.note || ''}</small>
         </div>`
       ).join("");
 
@@ -310,6 +284,7 @@ if (note.length > 50) {
 
 </body>
 </html>
+
 
 
 
