@@ -4,14 +4,23 @@
   <meta charset="UTF-8">
   <title>📘 كتاب دعم د. عمرو الشلمة</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     body {
       font-family: 'Amiri', serif;
       background: #f4f4f4;
       text-align: center;
       padding: 20px;
-      margin: 0;
+    }
+
+    .name-entry {
+      margin-bottom: 10px;
+      line-height: 1.5;
+      word-break: break-word;
     }
 
     h1 {
@@ -42,10 +51,9 @@
       top: 100px;
       width: 40%;
       color: #222;
-      font-size: 18px;
+      font-size: 16px;
       line-height: 2.1;
       padding: 0 10px;
-      word-break: break-word;
     }
 
     .right-page {
@@ -56,20 +64,6 @@
     .left-page {
       left: 60px;
       text-align: right;
-    }
-
-    .name-entry {
-      margin-bottom: 10px;
-    }
-
-    @keyframes highlight {
-      0% { background-color: #fffae6; }
-      50% { background-color: #fff3b0; }
-      100% { background-color: transparent; }
-    }
-
-    .name-entry.highlight {
-      animation: highlight 1.5s ease;
     }
 
     .controls {
@@ -90,10 +84,6 @@
       cursor: pointer;
     }
 
-    .controls button:hover {
-      background-color: #004a7c;
-    }
-
     #thankYouBox {
       display: none;
       position: absolute;
@@ -101,12 +91,10 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 9999;
-      text-align: center;
     }
 
     #thankYouBox img {
       width: 250px;
-      max-width: 90%;
       border-radius: 12px;
     }
 
@@ -133,7 +121,6 @@
 
       input {
         width: 90%;
-        font-size: 16px;
       }
 
       h1 {
@@ -167,78 +154,81 @@
   </div>
 
   <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOJwpMVbHG8dhShXq_WCe4jA16SQOgjVU",
+      authDomain: "bookofsupport.firebaseapp.com",
+      databaseURL: "https://bookofsupport-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "bookofsupport",
+      storageBucket: "bookofsupport.appspot.com",
+      messagingSenderId: "364651857222",
+      appId: "1:364651857222:web:05df2ee9a1fb5fa27bd147",
+      measurementId: "G-HG1TELVX1S"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     let allNames = [];
     let currentPage = 0;
     const namesPerPage = 10;
     let lastAddedName = "";
 
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzJw4fAPCPFcx5SeFuh-wP5BiLABlHZNI0vJ89jcGXlz17sMiPnziZlevambcw7WyXS6w/exec";
-    const sheetURL = "https://docs.google.com/spreadsheets/d/18mivhonXoxpLUizQCoTM_p0ebNoNL1_z4yR2foUAPsM/gviz/tq?tqx=out:json";
-
     function submitName() {
       const name = document.getElementById("nameInput").value.trim();
       const note = document.getElementById("noteInput").value.trim();
-
-      if (note.length > 50) {
-        alert("⚠️ الحد الأقصى لجملة الدعم هو 50 حرف فقط.");
-        return;
-      }
 
       if (!name) {
         alert("من فضلك اكتب اسمك");
         return;
       }
 
-      if (allNames.some(n => n.name.trim() === name)) {
-        alert("⚠️ هذا الاسم مكتوب سابقًا في الكتاب.");
+      if (note.length > 50) {
+        alert("⚠️ الحد الأقصى لجملة الدعم هو 50 حرف فقط.");
         return;
       }
 
       lastAddedName = name;
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: new URLSearchParams({ name, note })
-      })
-      .then(res => res.text())
-      .then(() => {
-        document.getElementById("successSound").play();
-        document.getElementById("thankYouBox").style.display = "block";
-        document.getElementById("nameInput").value = "";
-        document.getElementById("noteInput").value = "";
+      const newEntry = {
+        name: name,
+        note: note
+      };
 
-        setTimeout(() => {
-          document.getElementById("thankYouBox").style.display = "none";
-        }, 3000);
+      database.ref("supportBook").push(newEntry)
+        .then(() => {
+          document.getElementById("successSound").play();
+          document.getElementById("thankYouBox").style.display = "block";
+          document.getElementById("nameInput").value = "";
+          document.getElementById("noteInput").value = "";
 
-        fetchNames(() => {
-          const index = allNames.findIndex(n => n.name.trim() === name);
-          if (index !== -1) {
-            currentPage = Math.floor(index / namesPerPage);
-          }
-          renderPage();
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          setTimeout(() => {
+            document.getElementById("thankYouBox").style.display = "none";
+          }, 3000);
+
+          fetchNames(() => {
+            const index = allNames.findIndex(n => n.name.trim() === name);
+            if (index !== -1) {
+              currentPage = Math.floor(index / namesPerPage);
+            }
+            renderPage();
+          });
+        })
+        .catch((err) => {
+          alert("حدث خطأ أثناء الإرسال");
+          console.error(err);
         });
-      })
-      .catch(err => {
-        alert("حدث خطأ أثناء الإرسال");
-        console.error(err);
-      });
     }
 
     function fetchNames(callback) {
-      fetch(sheetURL)
-      .then(res => res.text())
-      .then(text => {
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
-
-        allNames = rows.map(row => {
-          const name = row.c[0]?.v || "";
-          const note = row.c[1]?.v || "";
-          return { name, note };
-        }).filter(n => n.name);
-
+      database.ref("supportBook").once("value", (snapshot) => {
+        allNames = [];
+        snapshot.forEach((child) => {
+          const data = child.val();
+          if (data.name) {
+            allNames.push({ name: data.name, note: data.note });
+          }
+        });
         if (callback) callback();
       });
     }
@@ -248,16 +238,16 @@
       const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
 
       const right = pageData.slice(0, 5).map(entry =>
-        `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
+        `<div class="name-entry">
           <strong style="font-size:16px;">🖋️ ${entry.name}</strong><br>
-          <small style="color:#666; font-size:12px">${entry.note || ''}</small>
+          <small style="color:#555;">${entry.note || ''}</small>
         </div>`
       ).join("");
 
       const left = pageData.slice(5).map(entry =>
-        `<div class="name-entry ${entry.name === lastAddedName ? 'highlight' : ''}">
+        `<div class="name-entry">
           <strong style="font-size:16px;">🖋️ ${entry.name}</strong><br>
-          <small style="color:#666; font-size:12px">${entry.note || ''}</small>
+          <small style="color:#555;">${entry.note || ''}</small>
         </div>`
       ).join("");
 
@@ -284,6 +274,7 @@
 
 </body>
 </html>
+
 
 
 
