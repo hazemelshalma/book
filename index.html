@@ -27,6 +27,23 @@
       margin-bottom: 10px;
       font-size: 24px;
     }
+.name-text {
+  font-size: 14px;
+  color: #111;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.note-text {
+  font-size: 10px;
+  color: #777;
+  display: block;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
 
     input {
       padding: 10px;
@@ -237,21 +254,20 @@
       const startIndex = currentPage * namesPerPage;
       const pageData = allNames.slice(startIndex, startIndex + namesPerPage);
 
-      const right = pageData.slice(0, 5).map(entry =>
-        `<div class="name-entry">
-          <strong style="font-size:16px;">🖋️ ${entry.name}</strong><br>
-         <small style="color:#777; font-size:10px;">${entry.note || ''}</small>
+    const right = pageData.slice(0, 5).map(entry =>
+  `<div class="name-entry">
+    <strong class="name-text">🖋️ ${entry.name}</strong><br>
+    <small class="note-text">${entry.note || ''}</small>
+  </div>`
+).join("");
 
-        </div>`
-      ).join("");
+const left = pageData.slice(5).map(entry =>
+  `<div class="name-entry">
+    <strong class="name-text">🖋️ ${entry.name}</strong><br>
+    <small class="note-text">${entry.note || ''}</small>
+  </div>`
+).join("");
 
-      const left = pageData.slice(5).map(entry =>
-        `<div class="name-entry">
-          <strong style="font-size:16px;">🖋️ ${entry.name}</strong><br>
-         <small style="color:#777; font-size:10px;">${entry.note || ''}</small>
-
-        </div>`
-      ).join("");
 
       document.getElementById("rightNames").innerHTML = right;
       document.getElementById("leftNames").innerHTML = left;
